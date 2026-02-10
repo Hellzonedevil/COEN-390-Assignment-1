@@ -8,6 +8,7 @@ import android.widget.Button;
 import android.widget.EditText;
 import android.widget.Toast;
 
+import androidx.annotation.NonNull;
 import androidx.appcompat.app.AppCompatActivity;
 
 import com.example.ass1.controller.SharedPreferenceHelper;
@@ -29,6 +30,7 @@ public class SettingsActivity extends AppCompatActivity {
 
         if (getSupportActionBar() != null) {
             getSupportActionBar().setDisplayHomeAsUpEnabled(true);
+            getSupportActionBar().setTitle("Settings Activity");
         }
 
         helper = new SharedPreferenceHelper(this);
@@ -78,7 +80,7 @@ public class SettingsActivity extends AppCompatActivity {
         String maxStr = edtMax.getText().toString().trim();
 
         if (!isValidName(n1) || !isValidName(n2) || !isValidName(n3)) {
-            Toast.makeText(this, "Names: letters/spaces only, max 20 chars.", Toast.LENGTH_SHORT).show();
+            Toast.makeText(this, "Names: letters/spaces only, 1-20 chars.", Toast.LENGTH_SHORT).show();
             return;
         }
 
@@ -116,18 +118,38 @@ public class SettingsActivity extends AppCompatActivity {
 
     @Override
     public boolean onPrepareOptionsMenu(Menu menu) {
-        // Hide "Edit" while already in edit mode
         MenuItem editItem = menu.findItem(R.id.action_edit);
         if (editItem != null) {
-            editItem.setVisible(!editMode);
+            // Requirement: Optional: while in Edit mode, change the menu item title to "Cancel"
+            if (editMode) {
+                // If there are no settings, we shouldn't allow cancel because they MUST set names
+                if (helper.hasSettings()) {
+                    editItem.setTitle("Cancel");
+                    editItem.setVisible(true);
+                } else {
+                    editItem.setVisible(false);
+                }
+            } else {
+                editItem.setTitle("Edit");
+                editItem.setVisible(true);
+            }
         }
         return super.onPrepareOptionsMenu(menu);
     }
 
     @Override
-    public boolean onOptionsItemSelected(MenuItem item) {
-        if (item.getItemId() == R.id.action_edit) {
-            setEditMode(true);
+    public boolean onOptionsItemSelected(@NonNull MenuItem item) {
+        if (item.getItemId() == android.R.id.home) {
+            finish();
+            return true;
+        } else if (item.getItemId() == R.id.action_edit) {
+            if (editMode) {
+                // Cancel action
+                setEditMode(false);
+                loadIntoFields();
+            } else {
+                setEditMode(true);
+            }
             return true;
         }
         return super.onOptionsItemSelected(item);

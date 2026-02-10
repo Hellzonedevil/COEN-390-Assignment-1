@@ -7,6 +7,7 @@ import android.widget.ArrayAdapter;
 import android.widget.ListView;
 import android.widget.TextView;
 
+import androidx.annotation.NonNull;
 import androidx.appcompat.app.AppCompatActivity;
 
 import com.example.ass1.controller.SharedPreferenceHelper;
@@ -31,6 +32,7 @@ public class DataActivity extends AppCompatActivity {
 
         if (getSupportActionBar() != null) {
             getSupportActionBar().setDisplayHomeAsUpEnabled(true);
+            getSupportActionBar().setTitle("Data Activity");
         }
 
         helper = new SharedPreferenceHelper(this);
@@ -72,7 +74,7 @@ public class DataActivity extends AppCompatActivity {
     private List<String> historyAsLines(boolean namesMode, Settings s) {
         String csv = helper.getHistoryCsv();
         List<String> out = new ArrayList<>();
-        if (csv == null || csv.isBlank()) return out;
+        if (csv == null || csv.isEmpty()) return out;
 
         String[] parts = csv.split(",");
         for (String p : parts) {
@@ -91,10 +93,27 @@ public class DataActivity extends AppCompatActivity {
     }
 
     @Override
-    public boolean onOptionsItemSelected(MenuItem item) {
-        if (item.getItemId() == R.id.action_toggle_mode) {
+    public boolean onPrepareOptionsMenu(Menu menu) {
+        MenuItem toggleItem = menu.findItem(R.id.action_toggle_mode);
+        if (toggleItem != null) {
+            if (showNames) {
+                toggleItem.setTitle("Show button number");
+            } else {
+                toggleItem.setTitle("Show Names");
+            }
+        }
+        return super.onPrepareOptionsMenu(menu);
+    }
+
+    @Override
+    public boolean onOptionsItemSelected(@NonNull MenuItem item) {
+        if (item.getItemId() == android.R.id.home) {
+            finish();
+            return true;
+        } else if (item.getItemId() == R.id.action_toggle_mode) {
             showNames = !showNames;
             refreshUI();
+            invalidateOptionsMenu(); // update the menu title
             return true;
         }
         return super.onOptionsItemSelected(item);
